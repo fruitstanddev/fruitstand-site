@@ -1,0 +1,81 @@
+---
+title: "Snowflake FRED Series Documentation"
+description: "The full universe of FRED (Federal Reserve Economic Data) series — continuously ingested, historically complete, and refreshed daily within Snowflake."
+---
+
+## Overview
+
+This product delivers the full universe of every FRED (Federal Reserve Economic Data) series, continuously ingested, historically complete, and refreshed daily within Snowflake.
+
+Data is standardized into analytic‑ready tables (observations, updates, categories, tags, releases) with rich metadata (units, frequency, seasonal adjustments) and automated pipeline quality checks (file load, row parity, error, merge and lineage validations) so you can query, join, model, and build dashboards immediately without building or maintaining your own FRED ingestion infrastructure.
+
+<Card title="Get it on the Snowflake Marketplace" icon="snowflake" href="https://app.snowflake.com/marketplace/listing/GZTYZ40XYU5">
+  Add the listing to your Snowflake account and start querying — no pipelines to build.
+</Card>
+
+## Categories Available
+
+Data is continuously added to our Snowflake listing as it becomes available from FRED. Financial and economic categories currently available but not limited to:
+
+- **Macro indicators** — GDP, CPI, PPI, employment, wages, unemployment
+- **Monetary & rates** — Fed funds, Treasury yield curve, spreads
+- **Prices & inflation** — CPI components, PCE, deflators
+- **Production & activity** — industrial production, capacity utilization
+- **Housing** — starts, permits, prices
+- **Financial markets** — bond yields, corporate rates, reserves
+- **Banking** — loan, deposit, balance sheet aggregates
+- **Regional & sector data** — state/metro labor, income, housing
+- **International & FX series** — sentiment and leading/lagging indicators
+- **Other** — local, city, regional, county, state, & country indicators
+
+## Sources of FRED
+
+There are over [100+ reputable sources](https://fred.stlouisfed.org/sources) that provide data to the Federal Reserve. Banks, governments, non-profits, and businesses all contribute to providing FRED data.
+
+## Data Ingestion
+
+Data is ingested into Snowflake with best practices in mind.
+
+<Steps>
+  <Step title="Logical layers">
+    Source API → ephemeral local parquet → S3 dated folder (raw snapshot by entity type) → Snowflake staging tables → curated Snowflake final tables/views.
+  </Step>
+  <Step title="Incremental ingestion">
+    Daily updates are pulled from the API; downstream assets filter only series whose updates exceed what observations already hold (incremental refreshing).
+  </Step>
+  <Step title="Fine‑grained file layout">
+    One parquet per series per run supports selective reprocessing, late arrivals, parallelism, and lifecycle policies.
+  </Step>
+</Steps>
+
+## Data Quality
+
+- Rich structured surfaces operational KPIs to downstream monitoring.
+- Explicit file log tables track S3 object lineage (location, stage, timestamp, latest flag) enabling audit and reprocessing.
+- Asset checks (pattern started) assert presence of required fields and row deltas (extensible to freshness / volume anomaly detection).
+
+## Disclosures
+
+Fruit Stand Data LLC is not endorsed by or affiliated with any of these providers. Use [contact@fruitstand.dev](mailto:contact@fruitstand.dev) for questions.
+
+## F.A.Q.
+
+Frequently asked questions from our clients.
+
+<AccordionGroup>
+  <Accordion title="What is FRED?">
+    FRED (Federal Reserve Economic Data) is the St. Louis Fed’s database of hundreds of thousands of global, US, regional, and financial time‑series (rates, money, prices, labor, GDP, housing, sentiment, banking, markets) aggregated from many official sources (Federal Reserve, BLS, BEA, Treasury, OECD, etc.). It is a foundational public macroeconomic and financial reference dataset for analysis, modeling, and monitoring.
+  </Accordion>
+  <Accordion title="How often is the data refreshed?">
+    Observations are updated daily via an incremental refresh. Releases are updated monthly. Categories and Tags are updated quarterly.
+  </Accordion>
+  <Accordion title="How is the data obtained?">
+    Data is obtained using the FRED API.
+  </Accordion>
+  <Accordion title="Why use Fruit Stand's FRED Snowflake listing instead of using the FRED API?">
+    You certainly can use the FRED API to ingest data into your Snowflake database. Clients use our services for speed to insights (e.g., faster modeling, analytics), data quality controls, and engineering. By using our listing, you no longer need to worry about API limits, throttling, pipeline management, and performance. Instead with us, you get complete coverage, full history of every available series that can be queried and analyzed right away, with daily refreshes. Don't wait weeks for engineering or maintaining pipelines, start analyzing right away.
+  </Accordion>
+  <Accordion title="Can I request additional data from FRED to be made available in Snowflake?">
+    Yes! Please reach out to [contact@fruitstand.dev](mailto:contact@fruitstand.dev) with the requirements. We are more than happy to make it available.
+  </Accordion>
+</AccordionGroup>

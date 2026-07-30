@@ -1,0 +1,68 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Fruit Stand",
+  "colors": {
+    "primary": "#f04242",
+    "light": "#f04242",
+    "dark": "#f04242"
+  },
+  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo/logo.svg",
+    "dark": "/logo/logo.svg"
+  },
+  "fonts": {
+    "family": "Figtree"
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Home",
+        "pages": ["index"]
+      },
+      {
+        "group": "Datasets",
+        "pages": [
+          "datasets/fred-series",
+          "datasets/earnings-call-transcripts"
+        ]
+      },
+      {
+        "group": "Company",
+        "pages": ["contact", "privacy-policy"]
+      }
+    ]
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Contact",
+        "href": "/contact"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Try for Free",
+      "href": "https://app.snowflake.com/marketplace/listing/GZTYZ40XYU5"
+    }
+  },
+  "footer": {
+    "links": [
+      {
+        "header": "Pages",
+        "items": [
+          { "label": "Contact", "href": "/contact" },
+          { "label": "Privacy Policy", "href": "/privacy-policy" }
+        ]
+      },
+      {
+        "header": "Documentation",
+        "items": [
+          { "label": "Snowflake FRED Series Docs", "href": "/datasets/fred-series" },
+          { "label": "Snowflake Earnings Call Transcripts Docs", "href": "/datasets/earnings-call-transcripts" }
+        ]
+      }
+    ]
+  }
+}
