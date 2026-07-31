@@ -15,9 +15,6 @@
     "light": "/logo/logo.svg",
     "dark": "/logo/logo.svg"
   },
-  "fonts": {
-    "family": "Figtree"
-  },
   "navigation": {
     "groups": [
       {
@@ -67,5 +64,6 @@
         ]
       }
     ]
-  }
+  },
+  "description": "Fruit Stand | Fresh Data Delivered Daily via Snowflake"
 }
