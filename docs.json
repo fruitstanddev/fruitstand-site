@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Fruit Stand",
   "colors": {
-    "primary": "#f04242",
-    "light": "#f04242",
-    "dark": "#f04242"
+    "primary": "#114946",
+    "light": "#0e8544",
+    "dark": "#0e8544"
   },
   "favicon": {
     "light": "/favicon.svg",
@@ -67,5 +67,10 @@
         ]
       }
     ]
+  },
+  "background": {
+    "color": {
+      "light": "#e5ede5"
+    }
   }
 }
