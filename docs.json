@@ -3,17 +3,17 @@
   "theme": "mint",
   "name": "Fruit Stand",
   "colors": {
-    "primary": "#f04242",
-    "light": "#f04242",
-    "dark": "#f04242"
+    "primary": "#0e8544",
+    "light": "#0e8544",
+    "dark": "#0e8544"
   },
   "favicon": {
-    "light": "/favicon.png",
-    "dark": "/favicon.png"
+    "light": "/favicon.svg",
+    "dark": "/favicon.svg"
   },
   "logo": {
-    "light": "/logo/logo.png",
-    "dark": "/logo/logo.png"
+    "light": "/logo/logo.svg",
+    "dark": "/logo/logo.svg"
   },
   "fonts": {
     "family": "Figtree"
