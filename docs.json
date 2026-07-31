@@ -8,12 +8,12 @@
     "dark": "#f04242"
   },
   "favicon": {
-    "light": "/favicon.png",
-    "dark": "/favicon.png"
+    "light": "/favicon.svg",
+    "dark": "/favicon.svg"
   },
   "logo": {
-    "light": "/logo/logo.png",
-    "dark": "/logo/logo.png"
+    "light": "/logo/logo.svg",
+    "dark": "/logo/logo.svg"
   },
   "fonts": {
     "family": "Figtree"
