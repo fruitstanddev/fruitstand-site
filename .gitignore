@@ -2,3 +2,5 @@ node_modules/
 .mintlify/
 *.log
 .DS_Store
+CLAUDE.md
+README-Instructions.md
