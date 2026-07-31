@@ -1,4 +1,4 @@
-<img src="logo/logo.svg" alt="Fruit Stand logo" width="88" height="88" />
+<img src="images/fruit-stand-logo-with-text-with-background-cropped.png" alt="Fruit Stand logo" width="600" height="314" />
 
 # Fruit Stand
 
