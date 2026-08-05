@@ -1,17 +1,58 @@
 ---
 title: "Snowflake FRED Series Documentation"
-description: "The full universe of FRED (Federal Reserve Economic Data) series — continuously ingested, historically complete, and refreshed daily within Snowflake."
+description: "250,000+ FRED (Federal Reserve Economic Data) series, continuously ingested, historically complete, and refreshed daily within Snowflake."
 ---
 
 ## Overview
 
-This product delivers the full universe of every FRED (Federal Reserve Economic Data) series, continuously ingested, historically complete, and refreshed daily within Snowflake.
+This product delivers over 250,000 FRED (Federal Reserve Economic Data) series, continuously ingested, historically complete, and refreshed daily within Snowflake.
 
 Data is standardized into analytic‑ready tables (observations, updates, categories, tags, releases) with rich metadata (units, frequency, seasonal adjustments) and automated pipeline quality checks (file load, row parity, error, merge and lineage validations) so you can query, join, model, and build dashboards immediately without building or maintaining your own FRED ingestion infrastructure.
 
 <Card title="Get it on the Snowflake Marketplace" icon="snowflake" href="https://app.snowflake.com/marketplace/listing/GZTYZ40XYU5">
-  Add the listing to your Snowflake account and start querying — no pipelines to build.
+  **$150/month** flat rate — no pipelines to build.
 </Card>
+
+- **250,000+ FRED series**, continuously ingested
+- **Historically complete**, refreshed daily
+- **100+ reputable sources** — Federal Reserve, BLS, BEA, Treasury, OECD, and more
+- **Rich metadata** — units, frequency, seasonal adjustments
+- **Automated pipeline quality checks** (row parity, lineage, merge validation)
+
+## Schema
+
+The core observations table is analytic‑ready, one row per series per date:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `series_id` | `varchar` | FRED series identifier (e.g. `CPIAUCSL`) |
+| `series_name` | `varchar` | Human‑readable series name |
+| `date` | `date` | Observation date |
+| `value` | `float` | Observed value |
+| `units` | `varchar` | Units of measurement |
+| `frequency` | `varchar` | Observation frequency (daily, monthly, quarterly, etc.) |
+| `seasonal_adjustment` | `varchar` | Seasonal adjustment method |
+| `output_type` | `varchar` | FRED output type |
+| `aggregation_method` | `varchar` | Aggregation method used |
+| `last_updated_at` | `timestamp` | Last time FRED updated this observation |
+
+```sql
+select series_id, series_name, date, value, units, frequency
+from fred.fred_series_observations
+where series_id = 'CPIAUCSL'
+order by date desc
+limit 3;
+```
+
+Example output (illustrative):
+
+| series_id | series_name | date | value | units | frequency |
+| --- | --- | --- | --- | --- | --- |
+| CPIAUCSL | Consumer Price Index for All Urban Consumers | 2026-06-01 | XXX.X | Index 1982-1984=100 | Monthly |
+| CPIAUCSL | Consumer Price Index for All Urban Consumers | 2026-05-01 | XXX.X | Index 1982-1984=100 | Monthly |
+| CPIAUCSL | Consumer Price Index for All Urban Consumers | 2026-04-01 | XXX.X | Index 1982-1984=100 | Monthly |
+
+Real output with full historical values is available on the [Snowflake Marketplace listing page](https://app.snowflake.com/marketplace/listing/GZTYZ40XYU5).
 
 ## Categories Available
 
@@ -69,11 +110,17 @@ Frequently asked questions from our clients.
   <Accordion title="How often is the data refreshed?">
     Observations are updated daily via an incremental refresh. Releases are updated monthly. Categories and Tags are updated quarterly.
   </Accordion>
+  <Accordion title="How far back does the historical data go?">
+    Historical coverage varies by series. Some FRED series date back decades, others start when the indicator was first published. For every series we carry, we ingest its full available history, not just a recent window, so you get complete backfill from day one instead of only new observations going forward.
+  </Accordion>
   <Accordion title="How is the data obtained?">
     Data is obtained using the FRED API.
   </Accordion>
   <Accordion title="Why use Fruit Stand's FRED Snowflake listing instead of using the FRED API?">
     You certainly can use the FRED API to ingest data into your Snowflake database. Clients use our services for speed to insights (e.g., faster modeling, analytics), data quality controls, and engineering. By using our listing, you no longer need to worry about API limits, throttling, pipeline management, and performance. Instead with us, you get complete coverage, full history of every available series that can be queried and analyzed right away, with daily refreshes. Don't wait weeks for engineering or maintaining pipelines, start analyzing right away.
+  </Accordion>
+  <Accordion title="What does it cost to build this ourselves vs. buy the listing?">
+    Building it yourself means standing up and maintaining a pipeline against the FRED API for 250,000+ series, handling rate limits, backfilling full history, and keeping up as series get revised or added. That's real engineering time up front and ongoing maintenance after. Our Snowflake listing is $150/month with those 250,000+ series already ingested, historically complete, and refreshed daily. No pipeline to build or maintain.
   </Accordion>
   <Accordion title="Can I request additional data from FRED to be made available in Snowflake?">
     Yes! Please reach out to [contact@fruitstand.dev](mailto:contact@fruitstand.dev) with the requirements. We are more than happy to make it available.
