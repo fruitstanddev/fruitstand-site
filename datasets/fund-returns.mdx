@@ -1,0 +1,205 @@
+---
+title: "Snowflake Fund Returns Documentation"
+description: "Trailing and calendar year total returns for US funds and ETFs, sourced from end-of-day pricing and refreshed on a regular schedule within Snowflake."
+---
+
+## Overview
+
+This product delivers trailing and calendar year total returns for approximately 32,000 US-listed mutual funds and ETFs, computed from adjusted end-of-day pricing data.
+
+Data is standardized into analytic‑ready tables (fund reference, trailing returns, calendar year returns) with automated pipeline quality checks (price validation, date ordering, return sanity bounds, cross-table consistency checks) so you can query, join, model, and build dashboards immediately without building or maintaining your own fund pricing and returns infrastructure.
+
+<Card title="Coming Soon to the Snowflake Marketplace" icon="snowflake" href="mailto:contact@fruitstand.dev?subject=Fund%20Returns%20Early%20Access">
+  **$150/month** flat rate (planned) — contact us for early access.
+</Card>
+
+<Note>
+  This listing isn't live on the Snowflake Marketplace yet. Reach out to [contact@fruitstand.dev](mailto:contact@fruitstand.dev) for early access.
+</Note>
+
+- **~32,000 US mutual funds and ETFs**, continuously ingested
+- **Trailing returns** from 1-day to 20-year, plus since-inception
+- **Calendar year returns**, broken out year by year
+- **Refreshed regularly** with incremental updates and periodic full rebuilds
+- **Survivorship-bias-free** — delisted funds keep their full historical returns rather than being dropped
+- **Automated pipeline quality checks** (price validation, date ordering, return sanity bounds)
+
+## Schema
+
+Three tables work together: a fund reference table, and two returns tables keyed by `code` (the fund/ETF ticker).
+
+### Fund Reference
+
+One row per fund or ETF:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `code` | `varchar` | Fund/ETF ticker |
+| `name` | `varchar` | Fund name |
+| `country` | `varchar` | Country of listing |
+| `exchange` | `varchar` | Listing exchange |
+| `currency` | `varchar` | Trading currency |
+| `type` | `varchar` | Fund or ETF |
+| `isin` | `varchar` | International Securities Identification Number |
+| `is_inactive` | `boolean` | Whether the fund is no longer active |
+| `inactive_date` | `date` | Date the fund became inactive, if applicable |
+
+When a fund is delisted or otherwise stops trading, it's marked `is_inactive` rather than removed, and its full trailing and calendar year return history remains available in the returns tables below. Nothing is silently dropped from the dataset when a fund goes inactive, so historical analysis stays free of survivorship bias.
+
+```sql
+select code, name, exchange, currency, type
+from ext_fund_vw
+where code = 'VTI';
+```
+
+Example output (illustrative):
+
+| code | name | exchange | currency | type |
+| --- | --- | --- | --- | --- |
+| VTI | Vanguard Total Stock Market ETF | NYSE ARCA | USD | ETF |
+
+### Trailing Returns
+
+One row per fund per as-of date, with one column per trailing period:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `code` | `varchar` | Fund/ETF ticker |
+| `as_of_date` | `date` | Date the trailing returns are calculated as of |
+| `return_1d` | `number` | 1-day cumulative (non-annualized) return |
+| `return_1w` | `number` | 1-week cumulative (non-annualized) return |
+| `return_1m` | `number` | 1-month cumulative (non-annualized) return |
+| `return_3m` | `number` | 3-month cumulative (non-annualized) return |
+| `return_6m` | `number` | 6-month cumulative (non-annualized) return |
+| `return_ytd` | `number` | Year-to-date cumulative (non-annualized) return |
+| `return_1y` | `number` | 1-year cumulative (non-annualized) return |
+| `return_2y` | `number` | 2-year **annualized** return (CAGR) |
+| `return_3y` | `number` | 3-year **annualized** return (CAGR) |
+| `return_4y` | `number` | 4-year **annualized** return (CAGR) |
+| `return_5y` | `number` | 5-year **annualized** return (CAGR) |
+| `return_7y` | `number` | 7-year **annualized** return (CAGR) |
+| `return_10y` | `number` | 10-year **annualized** return (CAGR) |
+| `return_15y` | `number` | 15-year **annualized** return (CAGR) |
+| `return_20y` | `number` | 20-year **annualized** return (CAGR) |
+| `return_earliest_available` | `number` | Annualized return since the earliest available price |
+
+Periods of 2 years or longer are annualized (CAGR); everything shorter, including YTD, is cumulative rather than annualized.
+
+```sql
+select code, as_of_date, return_1y, return_5y, return_10y
+from ext_fund_trailing_returns_vw
+where code = 'VTI'
+order by as_of_date desc
+limit 1;
+```
+
+Example output (illustrative):
+
+| code | as_of_date | return_1y | return_5y | return_10y |
+| --- | --- | --- | --- | --- |
+| VTI | 2026-08-04 | X.XXXXXX | X.XXXXXX | X.XXXXXX |
+
+### Calendar Year Returns
+
+One row per fund per calendar year:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| `code` | `varchar` | Fund/ETF ticker |
+| `calendar_year` | `number` | Calendar year |
+| `base_date` | `date` | Start-of-year date used for the return calculation |
+| `end_date` | `date` | End-of-year date used for the return calculation |
+| `calendar_year_return` | `number` | Cumulative return for that calendar year |
+
+Calendar year returns are always cumulative, never annualized. The current year's row is a partial, YTD-equivalent return, and a fund's inception year is a partial return from its first trading day to year-end.
+
+```sql
+select code, calendar_year, base_date, end_date, calendar_year_return
+from ext_fund_calendar_year_returns_vw
+where code = 'VTI'
+order by calendar_year desc
+limit 3;
+```
+
+Example output (illustrative):
+
+| code | calendar_year | base_date | end_date | calendar_year_return |
+| --- | --- | --- | --- | --- |
+| VTI | 2026 | 2026-01-01 | 2026-08-04 | X.XXXXXX |
+| VTI | 2025 | 2025-01-01 | 2025-12-31 | X.XXXXXX |
+| VTI | 2024 | 2024-01-01 | 2024-12-31 | X.XXXXXX |
+
+## Return Calculations
+
+**Adjusted closing price**: every return in this dataset is calculated from adjusted closing prices, not raw closing prices. The adjusted close accounts for stock splits and dividend/distribution reinvestment, so it reflects total return rather than just price change. Whenever a fund posts a new split or dividend, its adjusted close is backward-adjusted across its entire price history, which is one reason we run a periodic full history rebuild rather than relying on incremental updates alone.
+
+**Cumulative return**: the plain percentage change between two adjusted closing prices:
+
+```
+cumulative_return = (end_adjusted_close / base_adjusted_close) - 1
+```
+
+This is used for every calendar year return, and for trailing periods shorter than 2 years (1-day through 1-year, including YTD).
+
+**Annualized return (CAGR)**: for longer trailing periods, returns are annualized to a compound annual growth rate so windows of different lengths can be compared on the same basis:
+
+```
+annualized_return = (end_adjusted_close / base_adjusted_close) ^ (365.25 / days_between) - 1
+```
+
+This applies to trailing periods of 2 years or longer and to the since-inception return, following SEC/Morningstar convention: a span under 365 days is never annualized, since extrapolating a partial period into an annual rate can be misleading. If a period that would normally be annualized spans less than a year (e.g. a fund that IPO'd recently), it falls back to the cumulative formula instead.
+
+## Data Ingestion
+
+Data is ingested into Snowflake with best practices in mind, across three chained stages.
+
+<Steps>
+  <Step title="Fund universe">
+    The list of US funds and ETFs is pulled from the pricing API's exchange symbol list and loaded into Snowflake, then standardized through staging and internal tables into the fund reference table.
+  </Step>
+  <Step title="Price history">
+    For every active fund, end-of-day pricing (open, high, low, close, and adjusted close) is fetched from the pricing API, written to parquet, and staged in a dated S3 folder before being copied into Snowflake and standardized into an internal price history table. Corporate-action feeds (dividends and splits) are checked on every run, and any fund with a new dividend or split triggers a full price history reload for that fund, since the provider backward-adjusts its entire adjusted-close history whenever one posts.
+  </Step>
+  <Step title="Returns computation">
+    Once fresh price history lands, trailing and calendar year returns are recomputed, following the calculations described above, and merged into the curated final tables and secure views.
+  </Step>
+</Steps>
+
+Each stage is chained: the fund universe refresh triggers the price history pull, which in turn triggers the returns computation, so returns are always computed from that run's freshest pricing.
+
+**Refresh cadence**: an incremental bulk price update runs five days a week (Sunday, Monday, Tuesday, Thursday, Friday), pulling only recent price changes, plus a full price history reload for any fund with a new dividend or split that day. Twice a week (Wednesday and Saturday), every mutual fund and ETF in the universe is fully reloaded and the return tables are fully rebuilt.
+
+## Data Quality
+
+- **Positive price validation**: every closing and adjusted closing price must be strictly positive; this is checked at the earliest point in the pipeline, before it can propagate into any return figure.
+- **Return floor check**: no return can mathematically fall below -100% (a ratio of two positive prices can't produce anything lower) — a violation signals bad upstream price data and is caught automatically.
+- **Short-term sanity band**: 1-day and 1-week returns beyond ±50% are flagged for investigation. A swing that large over that short a window is almost always a data issue, most commonly a missed split or distribution adjustment, though rare legitimate cases exist (leveraged/inverse funds, genuine crash days).
+
+## Disclosures
+
+Fruit Stand Data LLC is not endorsed by or affiliated with any of the underlying pricing data providers. Use [contact@fruitstand.dev](mailto:contact@fruitstand.dev) for questions.
+
+## F.A.Q.
+
+Frequently asked questions from our clients.
+
+<AccordionGroup>
+  <Accordion title="What's the difference between trailing returns and calendar year returns?">
+    Trailing returns measure performance over a fixed lookback window ending on a given as-of date (e.g. the 1-year or 5-year return as of today). Calendar year returns instead measure performance within each calendar year (e.g. how a fund performed in 2024, in 2025, and so on), which is useful for comparing year-over-year performance rather than a rolling window.
+  </Accordion>
+  <Accordion title="Why are some returns annualized and others aren't?">
+    Trailing periods of 2 years or longer are annualized (compound annual growth rate), which is the standard convention for comparing multi-year performance on an apples-to-apples basis. Periods shorter than that, including year-to-date, are reported as cumulative returns rather than annualized, since annualizing a sub-year return can be misleading.
+  </Accordion>
+  <Accordion title="How often is the data refreshed?">
+    Prices are updated with an incremental bulk pull five days a week, plus a full history rebuild twice a week. Trailing and calendar year returns are recomputed automatically each time new pricing lands.
+  </Accordion>
+  <Accordion title="How far back does the historical data go?">
+    History starts at each fund's own inception, whenever its first trading day was, rather than a fixed cutoff date shared across the universe — that's what the `return_earliest_available` trailing-return column and each fund's earliest `calendar_year` row represent. Delisted funds keep their full history too, so older or discontinued funds aren't cut off early.
+  </Accordion>
+  <Accordion title="What does it cost to build this ourselves vs. buy the listing?">
+    Building it yourself means standing up a pipeline to pull end-of-day pricing for a broad fund and ETF universe, computing annualized and cumulative returns correctly across many lookback periods, backfilling history, and maintaining it as funds get added, delisted, or revised. Our Snowflake listing (coming soon) is planned at $150/month with all of that already built, computed, and kept current, no pipeline to build or maintain.
+  </Accordion>
+  <Accordion title="Can I request additional funds or ETFs to be made available in Snowflake?">
+    Yes! Please reach out to [contact@fruitstand.dev](mailto:contact@fruitstand.dev) with the requirements. We are more than happy to make it available.
+  </Accordion>
+</AccordionGroup>

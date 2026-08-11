@@ -25,7 +25,8 @@
         "group": "Datasets",
         "pages": [
           "datasets/fred-series",
-          "datasets/earnings-call-transcripts"
+          "datasets/earnings-call-transcripts",
+          "datasets/fund-returns"
         ]
       },
       {
@@ -60,7 +61,8 @@
         "header": "Documentation",
         "items": [
           { "label": "Snowflake FRED Series Docs", "href": "/datasets/fred-series" },
-          { "label": "Snowflake Earnings Call Transcripts Docs", "href": "/datasets/earnings-call-transcripts" }
+          { "label": "Snowflake Earnings Call Transcripts Docs", "href": "/datasets/earnings-call-transcripts" },
+          { "label": "Snowflake Fund Returns Docs (Coming Soon)", "href": "/datasets/fund-returns" }
         ]
       }
     ]
