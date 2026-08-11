@@ -62,7 +62,7 @@
         "items": [
           { "label": "Snowflake FRED Series Docs", "href": "/datasets/fred-series" },
           { "label": "Snowflake Earnings Call Transcripts Docs", "href": "/datasets/earnings-call-transcripts" },
-          { "label": "Snowflake Fund Returns Docs", "href": "/datasets/fund-returns" }
+          { "label": "Snowflake Fund Returns Docs (Coming Soon)", "href": "/datasets/fund-returns" }
         ]
       }
     ]
