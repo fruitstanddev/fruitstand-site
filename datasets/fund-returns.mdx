@@ -179,6 +179,8 @@ Each stage is chained: the fund universe refresh triggers the price history pull
 
 Fruit Stand Data LLC is not endorsed by or affiliated with any of the underlying pricing data providers. Use [contact@fruitstand.dev](mailto:contact@fruitstand.dev) for questions.
 
+**Price availability and return staleness**: on a date where a fund has zero trading volume, no closing price is produced for that date. Trailing returns still compute a value for every period by falling back to the nearest earlier date that has an actual price — for thinly-traded funds with real gaps in their price history, that base price can be older than the period's nominal window implies (for example, a `return_1w` value may reflect the change over more than 7 calendar days if the fund didn't trade for part of that stretch), even though the column keeps its standard period label.
+
 ## F.A.Q.
 
 Frequently asked questions from our clients.
