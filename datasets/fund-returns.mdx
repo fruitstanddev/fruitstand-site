@@ -9,13 +9,9 @@ This product delivers trailing and calendar year total returns for approximately
 
 Data is standardized into analytic‑ready tables (fund reference, trailing returns, calendar year returns) with automated pipeline quality checks (price validation, date ordering, return sanity bounds, cross-table consistency checks) so you can query, join, model, and build dashboards immediately without building or maintaining your own fund pricing and returns infrastructure.
 
-<Card title="Coming Soon to the Snowflake Marketplace" icon="snowflake" href="mailto:contact@fruitstand.dev?subject=Fund%20Returns%20Early%20Access">
-  **$300/month** flat rate (planned) — contact us for early access.
+<Card title="Get it on the Snowflake Marketplace" icon="snowflake" href="https://app.snowflake.com/marketplace/listing/GZTYZTG3LLO9">
+  **$250/month** flat rate — no pipelines to build.
 </Card>
-
-<Note>
-  This listing isn't live on the Snowflake Marketplace yet. Reach out to [contact@fruitstand.dev](mailto:contact@fruitstand.dev) for early access.
-</Note>
 
 - **~32,000 US mutual funds and ETFs**, continuously ingested
 - **Trailing returns** from 1-day to 20-year, plus since-inception
@@ -199,7 +195,7 @@ Frequently asked questions from our clients.
     History starts at each fund's own inception, whenever its first trading day was, rather than a fixed cutoff date shared across the universe — that's what the `return_earliest_available` trailing-return column and each fund's earliest `calendar_year` row represent. Delisted funds keep their full history too, so older or discontinued funds aren't cut off early.
   </Accordion>
   <Accordion title="What does it cost to build this ourselves vs. buy the listing?">
-    Building it yourself means standing up a pipeline to pull end-of-day pricing for a broad fund and ETF universe, computing annualized and cumulative returns correctly across many lookback periods, backfilling history, and maintaining it as funds get added, delisted, or revised. Our Snowflake listing (coming soon) is planned at $300/month with all of that already built, computed, and kept current, no pipeline to build or maintain.
+    Building it yourself means standing up a pipeline to pull end-of-day pricing for a broad fund and ETF universe, computing annualized and cumulative returns correctly across many lookback periods, backfilling history, and maintaining it as funds get added, delisted, or revised. Our Snowflake listing is $250/month with all of that already built, computed, and kept current, no pipeline to build or maintain.
   </Accordion>
   <Accordion title="Can I request additional funds or ETFs to be made available in Snowflake?">
     Yes! Please reach out to [contact@fruitstand.dev](mailto:contact@fruitstand.dev) with the requirements. We are more than happy to make it available.
