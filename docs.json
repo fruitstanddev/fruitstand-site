@@ -31,7 +31,11 @@
       },
       {
         "group": "Blog",
-        "pages": ["blog/index", "blog/fund-returns-pipeline-s3-to-snowflake"]
+        "pages": [
+          "blog/index",
+          "blog/fund-returns-pipeline-s3-to-snowflake",
+          "blog/fund-etf-returns-comparison"
+        ]
       },
       {
         "group": "Company",
