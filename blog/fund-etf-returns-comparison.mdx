@@ -1,0 +1,114 @@
+---
+title: "Fund and ETF Returns Data on Snowflake, Compared"
+description: "How Fruit Stand's Fund Returns dataset compares to other fund and ETF data on Snowflake Marketplace: coverage, pricing, and access model."
+tag: "Comparisons"
+author: "Fruit Stand Team"
+publishedDate: "2026-08-18"
+category: "Comparisons"
+keywords:
+  - "fund returns data comparison"
+  - "ETF returns dataset"
+  - "Snowflake Marketplace fund data"
+  - "mutual fund data provider"
+---
+
+*By Fruit Stand Team · August 18, 2026 · Comparisons*
+
+If you're evaluating fund and ETF returns data on Snowflake Marketplace,
+it's worth knowing what's actually out there before you buy. We looked at
+the other fund- and ETF-related listings on the Marketplace to see how
+they compare to [Fund Returns](/datasets/fund-returns): what each one
+covers, whether it computes returns at all, which return periods it
+publishes, how it's priced, how you get access, and how often the data
+refreshes.
+
+## Snowflake Fund Returns Listing Comparisons
+Last updated: August 18, 2026
+
+| Provider | What it covers | Computed returns? | Return periods | Pricing | Access | Freshness |
+| --- | --- | --- | --- | --- | --- | --- |
+| [**Fruit Stand: Fund Returns**](https://app.snowflake.com/marketplace/listing/GZTYZ40XYU5) | 32,000+ US funds and ETFs; 16 trailing return periods (1-day through 20-year plus since-inception) and calendar year returns | Yes | 1D, 1W, 1M, 3M, 6M, YTD, 1Y, 2Y, 3Y, 4Y, 5Y, 7Y, 10Y, 15Y, 20Y, since inception, plus calendar year | $250/month flat | Self-serve | Daily |
+| [**Morningstar**](https://app.snowflake.com/marketplace/listing/GZU6Z6T0HSG/morningstar-morningstar-equity-returns-and-statistics?search=fund%20returns) | Broad fund/ETF performance data (Morningstar Direct); Equity Data Sets live on Snowflake Marketplace since March 2026, Managed Investment Data listed as coming later in 2026 | Yes | Not published | Not published (enterprise licensing) | On request | Not published |
+| [**Nasdaq eVestment**](https://app.snowflake.com/marketplace/listing/GZTSZ1VR4HY/nasdaq-evestment-nasdaq-evestment-alternative-analytics) | 30,000+ long-only and alternative funds; performance analytics focused on hedge funds and alternatives | Yes, mainly for hedge funds/alternatives, not a mutual fund/ETF returns product | Not published | Not published (enterprise licensing) | On request | Not published |
+| [**FactSet**](https://app.snowflake.com/marketplace/listing/GZT0ZGCQ51QX/factset-factset-etf-time-series?search=factset%20etf%20returns) | ETF and fund analytics, 150+ daily fund-specific data points | Yes | Not published | Custom quote (enterprise licensing) | On request | Not published |
+| [**ETF Global**](https://app.snowflake.com/marketplace/listing/GZT0ZSTLPBI) | ETF fund flow data, sourced from sponsors, custodians, and distributors | No, flows, not returns | Not applicable, flow data, not returns | Not published | On request | Not published |
+| [**CRSP (now part of Morningstar)**](https://app.snowflake.com/marketplace/listing/GZ1MMZB2UP31/center-for-research-in-security-prices-llc-crsp-survivor-bias-free-us-mutual-fund-database) | 64,000+ open-ended funds (33,000+ active, 31,000+ delisted); survivor-bias-free, preserves both active and delisted funds | Yes | Monthly total returns (plus daily NAV) | Not published (subscription licensing) | On request | Database updated quarterly, distributed with a monthly lag |
+| [**CFRA Research**](https://app.snowflake.com/marketplace/listing/GZT0ZFHKJEL/cfra-research-global-etf-data) | 19,000+ ETFs globally (98% global coverage: US, Asia, Europe, Latin America, Canada, Africa, Australia); classifications, constituent holdings, STARS ratings, NAV returns and net flows | Yes | Daily, 1M, 3M, YTD, 1Y (trailing), annualized 3Y/5Y/10Y/since inception, plus discrete 1-5 year prior-year returns | Not published (institutional licensing) | On request | Daily |
+
+## What this actually shows
+
+Most of what's available for funds and ETFs on Snowflake Marketplace isn't
+a standalone returns product. **ETF Global** covers fund *flows* (money
+moving in and out), which is a different question than trailing or
+calendar year performance.
+
+**FactSet** and **Morningstar** do compute fund and ETF returns as part of
+their much broader platforms, so it would be misleading to say they can't.
+But neither sells that as a self-serve, flat-fee "fund returns" product the
+way Fruit Stand does: FactSet's ETF data is licensed through its own
+enterprise catalog, and Morningstar's Snowflake listing found under this
+search is scoped to equity returns and statistics rather than a dedicated
+mutual fund/ETF returns product (Managed Investment Data, the category that
+would cover funds specifically, was announced for later in 2026 and we
+haven't seen a public listing for it as of this writing).
+
+**CRSP** (now a Morningstar company as of its February 2026 acquisition) is
+the closest thing to a direct comparison in spirit: a survivor-bias-free US
+mutual fund database built specifically around computed returns, the same
+principle Fruit Stand uses to keep delisted funds' history intact. Its
+returns are monthly, though, not broken out across the 16 trailing periods
+Fruit Stand publishes, and it's distributed as a subscription product to
+academic and institutional licensees rather than sold as a flat self-serve
+Marketplace listing. 
+
+**Nasdaq eVestment** and **CFRA Research** both
+compute returns too, but for different audiences and scopes: eVestment is
+built for allocators evaluating hedge funds and alternatives, while CFRA's
+ETF data spans a global universe (19,000+ ETFs) with its own STARS ratings
+layered on top and a genuinely detailed return schema, daily, 1-month,
+3-month, YTD, and 1-year trailing returns, annualized 3/5/10-year and
+since-inception returns, plus discrete year-by-year prior returns going
+back five years. Where a provider's specific return periods aren't publicly
+documented, those cells are marked "Not published" rather than guessed at.
+
+## Where Fruit Stand fits
+
+[Fund Returns](/datasets/fund-returns) is built to answer one question
+well: what has this fund or ETF actually returned. 32,000+ US funds and
+ETFs, trailing returns across 16 periods from 1-day out to 20-year and
+since-inception, plus calendar year returns going back to each fund's own
+start date. It refreshes incrementally most weekdays and does a full
+rebuild of the entire universe twice a week, and it's a flat $250/month
+with no enterprise sales process, no custom quote, and no separate
+contract to negotiate: browse the [Snowflake Marketplace
+listing](https://app.snowflake.com/marketplace/listing/GZTYZ40XYU5) and
+start querying.
+
+For the pipeline behind those numbers, see [How Fund Returns Data Moves
+from source to Snowflake](/blog/fund-returns-pipeline-s3-to-snowflake).
+
+## F.A.Q.
+
+<AccordionGroup>
+  <Accordion title="How was this comparison put together?">
+    From each provider's own Snowflake Marketplace listing where it was accessible, plus their public product pages and press releases. Where a specific detail (a price, a return period, a refresh cadence) wasn't publicly documented, the cell is marked "Not published" rather than estimated.
+  </Accordion>
+  <Accordion title="Which listing has the broadest fund/ETF coverage?">
+    It depends what you're counting. CRSP covers the most individual mutual funds (64,000+, US-only, active and delisted). CFRA Research covers the most ETFs globally (19,000+, 98% global coverage). Fruit Stand covers 32,000+ US funds and ETFs combined with full computed trailing and calendar year returns on every one of them.
+  </Accordion>
+  <Accordion title="Is Fruit Stand cheaper than the other providers listed here?">
+    We can't say for certain, none of the other providers publish a price, so there's nothing to compare against directly. What we can say is that Fruit Stand is the only one on this list with a flat, public, self-serve price ($250/month): every other listing requires requesting access or a custom quote before you see a number.
+  </Accordion>
+  <Accordion title="How often is this comparison updated?">
+    Vendor offerings on Snowflake Marketplace change, new listings appear and existing ones add categories (as Morningstar's Managed Investment Data is expected to). This page reflects what was publicly available as of the "Last updated" date above; check each provider's own listing for their current terms.
+  </Accordion>
+</AccordionGroup>
+
+## Disclosure
+
+Fruit Stand Data LLC is not affiliated with or endorsed by Morningstar,
+FactSet, Nasdaq eVestment, ETF Global, CRSP, CFRA Research, or any other
+company mentioned above. Details reflect publicly available information as
+of the publish date above and can change; check each provider's own
+listing or website for current pricing and coverage. Questions about Fund
+Returns? Reach out at [contact@fruitstand.dev](mailto:contact@fruitstand.dev).

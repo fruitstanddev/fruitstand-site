@@ -11,7 +11,7 @@ sidebarTitle: "Blog"
     tag           - short badge shown next to the page in the sidebar
     author        - plain string, e.g. "Fruit Stand Team"
     publishedDate - "YYYY-MM-DD"
-    category      - "Guides" | "Announcements" | "Data notes" (extend as needed)
+    category      - "Guides" | "Announcements" | "Data notes" | "Comparisons" (extend as needed)
 
   Mintlify has no native author/date/category display, so render them as a
   plain byline line under the H1 in the post body, e.g.:
@@ -25,6 +25,14 @@ Guides and behind-the-scenes engineering notes on the datasets we ship
 through Snowflake.
 
 <CardGroup cols={2}>
+  <Card
+    title="Fund and ETF Returns Data on Snowflake, Compared"
+    icon="scale-balanced"
+    href="/blog/fund-etf-returns-comparison"
+  >
+    How Fund Returns compares to other fund and ETF data on Snowflake
+    Marketplace: coverage, pricing, and access model.
+  </Card>
   <Card
     title="How Fund Returns Data Moves from source to Snowflake"
     icon="database"
