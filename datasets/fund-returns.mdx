@@ -165,6 +165,8 @@ Each stage is chained: the fund universe refresh triggers the price history pull
 
 **Refresh cadence**: an incremental bulk price update runs five days a week (Sunday, Monday, Tuesday, Thursday, Friday), pulling only recent price changes, plus a full price history reload for any fund with a new dividend or split that day. Twice a week (Wednesday and Saturday), every mutual fund and ETF in the universe is fully reloaded and the return tables are fully rebuilt.
 
+For a deeper look at how this pipeline is built (S3 staging, the Snowflake `COPY INTO`, and the dbt models behind the final views), see [How Fund Returns Data Moves from source to Snowflake](/blog/fund-returns-pipeline-s3-to-snowflake) on the blog.
+
 ## Data Quality
 
 - **Positive price validation**: every closing and adjusted closing price must be strictly positive; this is checked at the earliest point in the pipeline, before it can propagate into any return figure.

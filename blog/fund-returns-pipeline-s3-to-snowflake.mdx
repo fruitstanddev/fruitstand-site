@@ -1,0 +1,197 @@
+---
+title: "How Fund Returns Data Moves from source to Snowflake"
+description: "How Fruit Stand computes 16 trailing and calendar year return periods, daily and since inception, for 32,000+ funds and ETFs in Snowflake."
+tag: "Data Engineering"
+author: "Fruit Stand Team"
+publishedDate: "2026-08-18"
+category: "Data notes"
+keywords:
+  - "fund returns on snowflake"
+  - "ETF returns"
+  - "fund and ETF returns data"
+  - "trailing returns calculation"
+  - "calendar year returns"
+---
+
+*By Fruit Stand Team · August 18, 2026 · Data notes*
+
+The [Fund Returns dataset](/datasets/fund-returns) covers 32,000+ US funds
+and ETFs, and every one of them has its trailing and calendar year returns
+recomputed on a schedule, not calculated once and left to go stale. This
+post is about how that happens: the path daily pricing data takes from
+source to the secure views you actually query, and the checks along the
+way that keep bad data from reaching them.
+
+## The pipeline, in four stages
+
+Four chained jobs run in sequence, each one triggered by the success (or
+failure) of the one before it:
+
+1. **Fund universe**: refresh the list of tracked funds and ETFs.
+2. **Price history**: fetch daily pricing and land it in Snowflake.
+3. **Returns computation**: turn fresh prices into trailing and calendar
+   year returns.
+4. **Cross-job checks**: reconciliation tests that need output from both
+   stage 2 and stage 3.
+
+Chaining them this way means returns are always computed from that run's
+freshest prices, not a stale snapshot from an earlier stage.
+
+This chain runs on a fixed schedule: an incremental update most weekdays
+(Sunday, Monday, Tuesday, Thursday, Friday) pulling only recent price
+changes, and a full reload twice a week (Wednesday and Saturday) that
+refetches every fund's complete history and rebuilds the return tables
+from scratch. The full reload is deliberate insurance: it re-derives
+returns from the ground up on a regular basis rather than relying on
+incremental updates indefinitely.
+
+## Stage 1: fund universe, no S3 required
+
+The list of active US funds and ETFs comes from our pricing provider's
+exchange symbol list. Because this is small reference data (thousands of
+rows, not millions), it's loaded straight into a Snowflake raw table with
+no intermediate storage. It's then merged into a fund reference table using
+a soft-delete pattern: a fund that drops out of the source list gets marked
+`is_inactive` rather than removed, so its historical returns stay queryable
+and the dataset never introduces survivorship bias.
+
+## Stage 2: price history, staged in S3
+
+This is where most of the volume lives, and where S3 comes in. End-of-day
+pricing for every active fund is fetched, written to local parquet files,
+and uploaded to a **dated S3 folder** before anything touches Snowflake:
+
+```
+raw/fund_price_history/<run_date>/<fetch_mode>/
+```
+
+`fetch_mode` is either `full` or `bulk` (incremental), and each run's
+folder is scoped to both the date and the mode. That means a full run and a
+bulk run for the same day always land in separate folders and load
+independently, so the two can never be combined into a single `COPY INTO`
+by mistake.
+
+The two modes also fetch differently:
+
+- **Full mode** writes one parquet file per ticker, fetched in parallel
+  across a small worker pool.
+- **Bulk mode** writes one parquet file per date, fetched sequentially,
+  covering only recent price changes.
+
+There's one deliberate exception: any ticker that just had a dividend or
+split is *excluded* from the bulk file and force-refetched in full instead.
+That's because our pricing provider backward-adjusts a fund's entire
+adjusted-close history whenever a corporate action posts, and an
+incremental update alone would leave the older, now-stale adjusted prices
+in place.
+
+Uploads are also idempotent: before fetching anything, the job lists what's
+already sitting in that day's S3 folder and skips it. A retried run doesn't
+re-fetch data it already has.
+
+## Stage 3: S3 into Snowflake
+
+Once a run's files are in S3, a `COPY INTO` pulls them into a raw Snowflake
+table from an external stage pointed at that day's folder:
+
+```sql
+copy into raw_fund_price_history
+from @s3_raw_stage/fund_price_history/<run_date>/<fetch_mode>
+pattern = '.*'
+file_format = (type = 'parquet')
+match_by_column_name = 'case_insensitive'
+on_error = 'abort_statement'
+```
+
+`match_by_column_name` lets the parquet schema map directly onto the raw
+table's columns without an explicit column list. The raw table itself is
+truncated and fully reloaded on every run. It's a landing zone, not a
+system of record, with all the incremental logic and deduplication handled
+downstream in the transformation layer instead.
+
+## Stage 4: from raw rows to curated views
+
+From there, a chain of dbt models turns raw price rows into the tables you
+actually query:
+
+- **Staging models** rename and lightly cast the raw columns: no logic,
+  just a clean handoff.
+- **Intermediate models** merge new rows in incrementally (keyed on fund
+  and date) and apply data-quality soft-deletes, described below, so
+  flagged rows are excluded from downstream calculations rather than
+  silently kept or hard-deleted.
+- **Return calculation views** use an as-of join to find each fund's
+  nearest prior trading day for every lookback period, rather than
+  requiring an exact date match, since not every fund trades on every date.
+- **Final models** pivot that into one row per fund per as-of date with one
+  column per return period, and are exposed as **secure views**: the
+  actual objects the [Fund Returns Snowflake
+  listing](https://app.snowflake.com/marketplace/listing/GZTYZ40XYU5) is
+  built on.
+
+## Guardrails along the way
+
+A pipeline that reloads and recomputes data on a schedule needs automated
+checks, not manual review, to catch problems before they reach a curated
+view. The checks that run on every build include:
+
+- **Positive price validation**: a closing or adjusted-closing price must
+  be strictly positive, checked before it can propagate into any return
+  figure.
+- **Grain uniqueness**: exactly one row per fund per date at the raw layer,
+  and per fund per as-of-date (or calendar year) downstream, so a
+  double-loaded batch can never silently duplicate rows into a return
+  calculation.
+- **Capped and zeroed-value checks**: adjusted-close values that are zeroed
+  out or pinned at an implausible ceiling (both signs of an upstream
+  provider issue rather than a real price) are flagged and excluded.
+- **Isolated first-price check**: a fund's very first price record is
+  flagged if it sits more than a few days away from the next one, since a
+  stray stub record like that would otherwise corrupt an
+  inception-to-date return.
+- **As-of ordering check**: the trading day a return is based on must fall
+  on or before the as-of date it's reported against, guarding against the
+  as-of join matching in the wrong direction.
+- **Return sanity bands**: a return can never mathematically fall below
+  -100%, and any 1-day or 1-week return beyond ±50% is flagged for review
+  rather than rejected outright, since a small number of cases (leveraged
+  or inverse funds, genuine crash days) are legitimate.
+- **Cross-model reconciliation**: a fund's year-to-date trailing return is
+  independently recomputed from the calendar-year model and checked against
+  the trailing-returns model, so the two paths have to agree.
+- **Price coverage check**: every fund with a fresh price on the latest
+  date must have a corresponding row in the final return tables for that
+  date, so a fund can't quietly fall out of the returns views while still
+  showing up in price history.
+
+## Why this shape
+
+Staging in S3 before loading, rather than writing straight to Snowflake,
+buys a few things: raw files are cheap to keep around for reprocessing or
+audit, a `COPY INTO` from object storage is fast and simple compared to
+row-by-row inserts, and partitioning by date and fetch mode gives every run
+a natural, isolated boundary. Pairing that with soft-deletes and automated
+checks downstream, rather than trying to get every upstream value perfect,
+keeps a single bad batch from silently corrupting a return figure.
+
+## F.A.Q.
+
+<AccordionGroup>
+  <Accordion title="Why stage data in S3 instead of writing directly to Snowflake?">
+    Raw files in S3 are cheap to keep around for reprocessing or audit, a `COPY INTO` from object storage is fast and simple compared to row-by-row inserts, and partitioning by date and fetch mode gives every run a clean, isolated folder to write to and load from.
+  </Accordion>
+  <Accordion title="How often is Fund Returns data refreshed?">
+    An incremental price update runs five days a week (Sunday, Monday, Tuesday, Thursday, Friday), and a full reload of every fund, with the return tables fully rebuilt, runs twice a week (Wednesday and Saturday).
+  </Accordion>
+  <Accordion title="What happens if a run fails partway through?">
+    Uploads to S3 are idempotent, so a retried run skips files it already uploaded rather than duplicating them. The Snowflake `COPY INTO` step uses `on_error = abort_statement`, so a load either lands cleanly or fails outright; it never partially commits a run's bad or incomplete data into the raw table.
+  </Accordion>
+  <Accordion title="Why do some funds get a full price history reload instead of an incremental update?">
+    Our pricing provider backward-adjusts a fund's entire adjusted-close history whenever a dividend or split posts. An incremental update alone would leave the older, now-stale adjusted prices in place, so any fund with a new corporate action is force-refetched in full instead.
+  </Accordion>
+</AccordionGroup>
+
+If you want to query the result directly, the [Fund Returns
+dataset](/datasets/fund-returns) documents the final schema, refresh
+cadence, and disclosure policy in full. Questions about the pipeline?
+Reach out at [contact@fruitstand.dev](mailto:contact@fruitstand.dev).

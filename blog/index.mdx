@@ -1,0 +1,36 @@
+---
+title: "Blog"
+description: "Guides and data notes on the pipelines behind FRED economic data, earnings call transcripts, and fund returns, from the Fruit Stand team."
+sidebarTitle: "Blog"
+---
+
+{/*
+  Frontmatter convention for posts in this directory:
+    title         - 50-60 chars, keyword-led (becomes the browser tab title)
+    description   - 150-160 chars (becomes the meta description)
+    tag           - short badge shown next to the page in the sidebar
+    author        - plain string, e.g. "Fruit Stand Team"
+    publishedDate - "YYYY-MM-DD"
+    category      - "Guides" | "Announcements" | "Data notes" (extend as needed)
+
+  Mintlify has no native author/date/category display, so render them as a
+  plain byline line under the H1 in the post body, e.g.:
+    *By Fruit Stand Team · August 18, 2026 · Guides*
+
+  New posts: add the .mdx file here, then list it below (newest first) and
+  in docs.json's "Blog" navigation group.
+*/}
+
+Guides and behind-the-scenes engineering notes on the datasets we ship
+through Snowflake.
+
+<CardGroup cols={2}>
+  <Card
+    title="How Fund Returns Data Moves from source to Snowflake"
+    icon="database"
+    href="/blog/fund-returns-pipeline-s3-to-snowflake"
+  >
+    How Fruit Stand computes 16 trailing and calendar year return periods,
+    daily and since inception, for 32,000+ funds and ETFs in Snowflake.
+  </Card>
+</CardGroup>

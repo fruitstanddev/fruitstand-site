@@ -30,6 +30,10 @@
         ]
       },
       {
+        "group": "Blog",
+        "pages": ["blog/index", "blog/fund-returns-pipeline-s3-to-snowflake"]
+      },
+      {
         "group": "Company",
         "pages": ["contact", "privacy-policy"]
       }
@@ -37,6 +41,10 @@
   },
   "navbar": {
     "links": [
+      {
+        "label": "Blog",
+        "href": "/blog"
+      },
       {
         "label": "Contact",
         "href": "/contact"
@@ -53,6 +61,7 @@
       {
         "header": "Pages",
         "items": [
+          { "label": "Blog", "href": "/blog" },
           { "label": "Contact", "href": "/contact" },
           { "label": "Privacy Policy", "href": "/privacy-policy" }
         ]
